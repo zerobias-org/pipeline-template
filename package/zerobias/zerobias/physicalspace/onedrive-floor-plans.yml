@@ -1,0 +1,1202 @@
+# Floor plan workbook in OneDrive 365 -> ZeroBias records, through the dynamic collector and the Microsoft Graph
+# Excel data producer. Same mappings as dev's "OneDrive 365 Pipeline" (12743bb5-dfd7-4b46-8b63-11bf68a26737).
+# Left out, because only a boundary knows them: the workbook (each mapping's source objectId/objectPath/schemaId), the
+# context (boundary/target/scope), targets and the schedule. Set them when you create the pipeline.
+# The mappings run in list order and that order matters: a link's property (planPosition, placement) is only written
+# from the row that holds it, so File and FloorPlan load before the spaces, and spaces before what they contain.
+# Needs the Drawable/Canvas model of the base schema (auditlogic/schema PR #228) on the environment.
+id: 0201bd60-e171-491f-9751-e80be61dd7b3
+name: OneDrive 365 Floor Plans
+description: "Loads a floor plan workbook kept in OneDrive 365 into ZeroBias records, one mapping per sheet: File,
+  FloorPlan, PhysicalSpace, PhysicalOpening, PhysicalAsset and PhysicalObject, with their canvases, placement and
+  opening links. Choose the workbook, boundary and targets when you create the pipeline."
+keywords:
+  - onedrive
+  - floor plan
+  - workbook
+  - excel
+  - physical space
+productId: 6ffa85fc-4a02-597c-ad12-e5976c6be67f
+collectorArtifact: "@zerobias-org/collectorbot-zerobias-zerobias-dynamic"
+executionMode: caller
+batchMode: full
+format: json
+connectorType: dynamic
+scopeMode: selected
+params:
+  dataMappings:
+    - id: mapping_floorplan_file
+      source:
+        objectName: File
+      mappings:
+        - id: file_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: file_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: file_fileVersionId
+          source:
+            key: fileVersionId
+            name: fileVersionId
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: fileVersionId ? $trim(fileVersionId)
+          destination:
+            key: fileVersionId
+            name: fileVersionId
+            type: string
+            level: 0
+            fieldId: 20dd3806-654a-4fa4-ab4a-94f3c7251f3d
+            required: true
+            dataTypeName: uuid
+        - id: file_size
+          source:
+            key: size
+            name: size
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: size ? $number(size)
+          destination:
+            key: size
+            name: size
+            type: number
+            level: 0
+            fieldId: 302a5d5a-c3cd-4928-bf31-a751daf77f1b
+            required: true
+            dataTypeName: int64
+        - id: file_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: file_mimeType
+          source:
+            key: mimeType
+            name: mimeType
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: mimeType ? mimeType
+          destination:
+            key: mimeType
+            name: mimeType
+            type: string
+            level: 0
+            fieldId: 7d63dff4-ab4e-467f-acda-8961dda01917
+            required: false
+            dataTypeName: mimeType
+      metadata:
+        name: File sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / File: one row per drawing file. Blank cell = not set. fileVersionId and size are required
+          by the class."
+      destination:
+        classId: 79a6b04d-2aae-53c0-910f-482c562e3665
+        className: File
+    - id: mapping_floorplan_floorplan
+      source:
+        objectName: FloorPlan
+      mappings:
+        - id: fp_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: fp_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: fp_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: fp_extent
+          source:
+            - key: extent.width
+              name: extent.width
+              type: string
+              level: 0
+            - key: extent.depth
+              name: extent.depth
+              type: string
+              level: 0
+            - key: extent.unit
+              name: extent.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
+                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+          destination:
+            key: extent
+            name: extent
+            type: object
+            level: 0
+            fieldId: 98bf7fdc-332b-4d65-bd48-1f574b49c0bc
+            required: false
+            dataTypeName: extent
+        - id: fp_calibration
+          source:
+            - key: calibration.originX
+              name: calibration.originX
+              type: string
+              level: 0
+            - key: calibration.originY
+              name: calibration.originY
+              type: string
+              level: 0
+            - key: calibration.imageWidth
+              name: calibration.imageWidth
+              type: string
+              level: 0
+            - key: calibration.imageHeight
+              name: calibration.imageHeight
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`calibration.originX` or `calibration.originY` or `calibration.imageWidth` or `calibration.imageHeight`) ?
+                { "originX": `calibration.originX` ? $number(`calibration.originX`), "originY": `calibration.originY` ?
+                $number(`calibration.originY`), "imageWidth": `calibration.imageWidth` ?
+                $number(`calibration.imageWidth`), "imageHeight": `calibration.imageHeight` ?
+                $number(`calibration.imageHeight`) }'
+          destination:
+            key: calibration
+            name: calibration
+            type: object
+            level: 0
+            fieldId: a27ed924-e9c1-4bf6-838e-8fdc35cde9b6
+            required: false
+            dataTypeName: planCalibration
+        - id: fp_file
+          source:
+            key: file
+            name: file
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: file ? file
+          destination:
+            key: file
+            name: file
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+      metadata:
+        name: FloorPlan sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / FloorPlan: one row per drawing. Blank cell = not set."
+      destination:
+        classId: 79270295-502b-576b-84bc-82faa8608d62
+        className: FloorPlan
+    - id: mapping_floorplan_physicalspace
+      source:
+        objectName: PhysicalSpace
+      mappings:
+        - id: ps_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: ps_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: ps_description
+          source:
+            key: description
+            name: description
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: description ? description
+          destination:
+            key: description
+            name: description
+            type: string
+            level: 0
+            fieldId: b3150cdd-d364-4917-b830-76a155c08cfe
+            required: false
+            dataTypeName: string
+        - id: ps_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: ps_sourceSystem
+          source:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: sourceSystem ? sourceSystem
+          destination:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+            fieldId: d13b6526-66c0-41e4-a044-3d6ae10f6227
+            required: false
+            dataTypeName: string
+        - id: ps_spaceType
+          source:
+            key: spaceType
+            name: spaceType
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: spaceType ? spaceType
+          destination:
+            key: spaceType
+            name: spaceType
+            type: string
+            level: 0
+            fieldId: ca599231-27b9-480d-8246-b2b5be52a631
+            required: false
+            dataTypeName: physicalSpace_type
+        - id: ps_extent
+          source:
+            - key: extent.width
+              name: extent.width
+              type: string
+              level: 0
+            - key: extent.depth
+              name: extent.depth
+              type: string
+              level: 0
+            - key: extent.unit
+              name: extent.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
+                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+          destination:
+            key: extent
+            name: extent
+            type: object
+            level: 0
+            fieldId: 98bf7fdc-332b-4d65-bd48-1f574b49c0bc
+            required: false
+            dataTypeName: extent
+        - id: ps_footprint
+          source:
+            - key: footprint.kind
+              name: footprint.kind
+              type: string
+              level: 0
+            - key: footprint.unit
+              name: footprint.unit
+              type: string
+              level: 0
+            - key: footprint.vertices
+              name: footprint.vertices
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '`footprint.kind` ? { "kind": `footprint.kind`, "unit": `footprint.unit` ? `footprint.unit`, "vertices":
+                `footprint.vertices` ? [$map($split(`footprint.vertices`, " | "), function($p) { ($c := $split($p, ",");
+                { "x": $number($trim($c[0])), "y": $number($trim($c[1])) }) })] }'
+          destination:
+            key: footprint
+            name: footprint
+            type: object
+            level: 0
+            fieldId: 2427027f-f6ad-4ddf-ae9d-4fa67673b87e
+            required: false
+            dataTypeName: shape
+        - id: ps_placedIn
+          source:
+            - key: placedIn
+              name: placedIn
+              type: string
+              level: 0
+            - key: placedIn.placement.x
+              name: placedIn.placement.x
+              type: string
+              level: 0
+            - key: placedIn.placement.y
+              name: placedIn.placement.y
+              type: string
+              level: 0
+            - key: placedIn.placement.unit
+              name: placedIn.placement.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
+                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
+                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+          destination:
+            key: placedIn
+            name: placedIn
+            type: object
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+        - id: ps_canvases
+          source:
+            - key: canvases
+              name: canvases
+              type: string
+              level: 0
+            - key: canvases.planPosition.x
+              name: canvases.planPosition.x
+              type: string
+              level: 0
+            - key: canvases.planPosition.y
+              name: canvases.planPosition.y
+              type: string
+              level: 0
+            - key: canvases.planPosition.width
+              name: canvases.planPosition.width
+              type: string
+              level: 0
+            - key: canvases.planPosition.height
+              name: canvases.planPosition.height
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'canvases ? ($ids := $split(canvases, " | "); $x := $split(`canvases.planPosition.x`, " | "); $y :=
+                $split(`canvases.planPosition.y`, " | "); $w := $split(`canvases.planPosition.width`, " | "); $h :=
+                $split(`canvases.planPosition.height`, " | "); [$map($ids, function($id, $i) { ($x[$i] or $y[$i] or
+                $w[$i] or $h[$i]) ? { "id": $id, "zerobias_zerobias_base_schema_planPosition": { "x": $x[$i] ?
+                $number($x[$i]), "y": $y[$i] ? $number($y[$i]), "width": $w[$i] ? $number($w[$i]), "height": $h[$i] ?
+                $number($h[$i]) } } : $id })])'
+          destination:
+            key: canvases
+            name: canvases
+            type: array
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+      metadata:
+        name: PhysicalSpace sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / PhysicalSpace: one row per space. Blank cell = not set."
+      destination:
+        classId: c4faad22-0bd5-5159-ae70-6975d5685092
+        className: PhysicalSpace
+    - id: mapping_floorplan_physicalopening
+      source:
+        objectName: PhysicalOpening
+      mappings:
+        - id: po_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: po_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: po_description
+          source:
+            key: description
+            name: description
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: description ? description
+          destination:
+            key: description
+            name: description
+            type: string
+            level: 0
+            fieldId: b3150cdd-d364-4917-b830-76a155c08cfe
+            required: false
+            dataTypeName: string
+        - id: po_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: po_sourceSystem
+          source:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: sourceSystem ? sourceSystem
+          destination:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+            fieldId: d13b6526-66c0-41e4-a044-3d6ae10f6227
+            required: false
+            dataTypeName: string
+        - id: po_entryType
+          source:
+            key: entryType
+            name: entryType
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: entryType ? entryType
+          destination:
+            key: entryType
+            name: entryType
+            type: string
+            level: 0
+            fieldId: b403da1d-a125-438b-bc01-e2b851d494d0
+            required: false
+            dataTypeName: physicalEntry_type
+        - id: po_operation
+          source:
+            key: operation
+            name: operation
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: operation ? operation
+          destination:
+            key: operation
+            name: operation
+            type: string
+            level: 0
+            fieldId: d5692ff7-4019-46cb-b4a2-5f7069cfa7f9
+            required: false
+            dataTypeName: physicalOpening_operation
+        - id: po_boundary
+          source:
+            key: boundary
+            name: boundary
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: boundary ? boundary
+          destination:
+            key: boundary
+            name: boundary
+            type: string
+            level: 0
+            fieldId: 07370a5d-a2e8-4c22-97de-9c6ba6690e4e
+            required: false
+            dataTypeName: physicalOpening_boundary
+        - id: po_extent
+          source:
+            - key: extent.width
+              name: extent.width
+              type: string
+              level: 0
+            - key: extent.depth
+              name: extent.depth
+              type: string
+              level: 0
+            - key: extent.unit
+              name: extent.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
+                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+          destination:
+            key: extent
+            name: extent
+            type: object
+            level: 0
+            fieldId: 98bf7fdc-332b-4d65-bd48-1f574b49c0bc
+            required: false
+            dataTypeName: extent
+        - id: po_placedIn
+          source:
+            - key: placedIn
+              name: placedIn
+              type: string
+              level: 0
+            - key: placedIn.placement.x
+              name: placedIn.placement.x
+              type: string
+              level: 0
+            - key: placedIn.placement.y
+              name: placedIn.placement.y
+              type: string
+              level: 0
+            - key: placedIn.placement.unit
+              name: placedIn.placement.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
+                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
+                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+          destination:
+            key: placedIn
+            name: placedIn
+            type: object
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+        - id: po_connects
+          source:
+            - key: connects
+              name: connects
+              type: string
+              level: 0
+            - key: connects.spaceAccess.side
+              name: connects.spaceAccess.side
+              type: string
+              level: 0
+            - key: connects.spaceAccess.hinge
+              name: connects.spaceAccess.hinge
+              type: string
+              level: 0
+            - key: connects.spaceAccess.swing
+              name: connects.spaceAccess.swing
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'connects ? ($ids := $split(connects, " | "); $s := $split(`connects.spaceAccess.side`, " | "); $h :=
+                $split(`connects.spaceAccess.hinge`, " | "); $w := $split(`connects.spaceAccess.swing`, " | ");
+                [$map($ids, function($id, $i) { ($s[$i] or $h[$i] or $w[$i]) ? { "id": $id,
+                "zerobias_zerobias_base_schema_spaceAccess": { "side": $s[$i] ? $s[$i], "hinge": $h[$i] ? $h[$i],
+                "swing": $w[$i] ? $w[$i] } } : $id })])'
+          destination:
+            key: connects
+            name: connects
+            type: array
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+      metadata:
+        name: PhysicalOpening sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / PhysicalOpening: one row per door or window. Blank cell = not set."
+      destination:
+        classId: 175a403c-a707-573c-af00-279299345d9d
+        className: PhysicalOpening
+    - id: mapping_floorplan_physicalasset
+      source:
+        objectName: PhysicalAsset
+      mappings:
+        - id: pa_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: pa_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: pa_description
+          source:
+            key: description
+            name: description
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: description ? description
+          destination:
+            key: description
+            name: description
+            type: string
+            level: 0
+            fieldId: b3150cdd-d364-4917-b830-76a155c08cfe
+            required: false
+            dataTypeName: string
+        - id: pa_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: pa_componentType
+          source:
+            key: componentType
+            name: componentType
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: componentType ? componentType
+          destination:
+            key: componentType
+            name: componentType
+            type: string
+            level: 0
+            fieldId: 1c6c4f05-5a05-46b7-969d-71d4e0fff3e4
+            required: false
+            dataTypeName: oscalComponentType
+        - id: pa_kind
+          source:
+            key: kind
+            name: kind
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: kind ? kind
+          destination:
+            key: kind
+            name: kind
+            type: string
+            level: 0
+            fieldId: 48b50915-5036-4b58-aff2-31460c39a32c
+            required: false
+            dataTypeName: physicalObject_kind
+        - id: pa_sourceSystem
+          source:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: sourceSystem ? sourceSystem
+          destination:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+            fieldId: d13b6526-66c0-41e4-a044-3d6ae10f6227
+            required: false
+            dataTypeName: string
+        - id: pa_virtual
+          source:
+            key: virtual
+            name: virtual
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: virtual ? ($lowercase(virtual) = "true")
+          destination:
+            key: virtual
+            name: virtual
+            type: boolean
+            level: 0
+            fieldId: 793528a5-184f-43db-bb69-916475ed3bb3
+            required: false
+            dataTypeName: boolean
+        - id: pa_extent
+          source:
+            - key: extent.width
+              name: extent.width
+              type: string
+              level: 0
+            - key: extent.depth
+              name: extent.depth
+              type: string
+              level: 0
+            - key: extent.unit
+              name: extent.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
+                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+          destination:
+            key: extent
+            name: extent
+            type: object
+            level: 0
+            fieldId: 98bf7fdc-332b-4d65-bd48-1f574b49c0bc
+            required: false
+            dataTypeName: extent
+        - id: pa_footprint
+          source:
+            - key: footprint.kind
+              name: footprint.kind
+              type: string
+              level: 0
+            - key: footprint.unit
+              name: footprint.unit
+              type: string
+              level: 0
+            - key: footprint.vertices
+              name: footprint.vertices
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '`footprint.kind` ? { "kind": `footprint.kind`, "unit": `footprint.unit` ? `footprint.unit`, "vertices":
+                `footprint.vertices` ? [$map($split(`footprint.vertices`, " | "), function($p) { ($c := $split($p, ",");
+                { "x": $number($trim($c[0])), "y": $number($trim($c[1])) }) })] }'
+          destination:
+            key: footprint
+            name: footprint
+            type: object
+            level: 0
+            fieldId: 2427027f-f6ad-4ddf-ae9d-4fa67673b87e
+            required: false
+            dataTypeName: shape
+        - id: pa_placedIn
+          source:
+            - key: placedIn
+              name: placedIn
+              type: string
+              level: 0
+            - key: placedIn.placement.x
+              name: placedIn.placement.x
+              type: string
+              level: 0
+            - key: placedIn.placement.y
+              name: placedIn.placement.y
+              type: string
+              level: 0
+            - key: placedIn.placement.unit
+              name: placedIn.placement.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
+                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
+                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+          destination:
+            key: placedIn
+            name: placedIn
+            type: object
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+      metadata:
+        name: PhysicalAsset sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / PhysicalAsset: one row per fixture, furniture or equipment item. Blank cell = not set."
+      destination:
+        classId: 3169d002-75b6-5f04-be8f-390433a3266c
+        className: PhysicalAsset
+    - id: mapping_floorplan_physicalobject
+      source:
+        objectName: PhysicalObject
+      mappings:
+        - id: pobj_id
+          source:
+            key: id
+            name: id
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: id
+            name: id
+            type: string
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: true
+            dataTypeName: string
+        - id: pobj_name
+          source:
+            key: name
+            name: name
+            type: string
+            level: 0
+          transform:
+            type: direct
+          destination:
+            key: name
+            name: name
+            type: string
+            level: 0
+            fieldId: 93e036b3-0c4d-4660-b01b-2ee461a1861e
+            required: true
+            dataTypeName: string
+        - id: pobj_description
+          source:
+            key: description
+            name: description
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: description ? description
+          destination:
+            key: description
+            name: description
+            type: string
+            level: 0
+            fieldId: b3150cdd-d364-4917-b830-76a155c08cfe
+            required: false
+            dataTypeName: string
+        - id: pobj_note
+          source:
+            key: note
+            name: note
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: note ? note
+          destination:
+            key: note
+            name: note
+            type: string
+            level: 0
+            fieldId: 8a1f3c9c-496d-4270-a227-ed043d2272a6
+            required: false
+            dataTypeName: string
+        - id: pobj_componentType
+          source:
+            key: componentType
+            name: componentType
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: componentType ? componentType
+          destination:
+            key: componentType
+            name: componentType
+            type: string
+            level: 0
+            fieldId: 1c6c4f05-5a05-46b7-969d-71d4e0fff3e4
+            required: false
+            dataTypeName: oscalComponentType
+        - id: pobj_kind
+          source:
+            key: kind
+            name: kind
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: kind ? kind
+          destination:
+            key: kind
+            name: kind
+            type: string
+            level: 0
+            fieldId: 48b50915-5036-4b58-aff2-31460c39a32c
+            required: false
+            dataTypeName: physicalObject_kind
+        - id: pobj_sourceSystem
+          source:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+          transform:
+            type: expression
+            options:
+              expression: sourceSystem ? sourceSystem
+          destination:
+            key: sourceSystem
+            name: sourceSystem
+            type: string
+            level: 0
+            fieldId: d13b6526-66c0-41e4-a044-3d6ae10f6227
+            required: false
+            dataTypeName: string
+        - id: pobj_extent
+          source:
+            - key: extent.width
+              name: extent.width
+              type: string
+              level: 0
+            - key: extent.depth
+              name: extent.depth
+              type: string
+              level: 0
+            - key: extent.unit
+              name: extent.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
+                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+          destination:
+            key: extent
+            name: extent
+            type: object
+            level: 0
+            fieldId: 98bf7fdc-332b-4d65-bd48-1f574b49c0bc
+            required: false
+            dataTypeName: extent
+        - id: pobj_placedIn
+          source:
+            - key: placedIn
+              name: placedIn
+              type: string
+              level: 0
+            - key: placedIn.placement.x
+              name: placedIn.placement.x
+              type: string
+              level: 0
+            - key: placedIn.placement.y
+              name: placedIn.placement.y
+              type: string
+              level: 0
+            - key: placedIn.placement.unit
+              name: placedIn.placement.unit
+              type: string
+              level: 0
+          transform:
+            type: expression
+            options:
+              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
+                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
+                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+          destination:
+            key: placedIn
+            name: placedIn
+            type: object
+            level: 0
+            fieldId: 2b967711-fc77-4bd2-a193-81a6fe160757
+            required: false
+            dataTypeName: string
+      metadata:
+        name: PhysicalObject sheet
+        createdAt: 2026-10-13T00:00:00.000Z
+        description: "floorplan.xlsx / PhysicalObject: one row per drawn item that is not an asset. Blank cell = not set."
+      destination:
+        classId: 030a3931-a09c-5def-bb33-dc102ce66043
+        className: PhysicalObject
