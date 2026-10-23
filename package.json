@@ -1,0 +1,29 @@
+{
+  "name": "@zerobias-org/pipeline-template",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ZeroBias pipeline template artifacts",
+  "main": "main.js",
+  "publishConfig": {
+    "registry": "https://pkg.zerobias.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zerobias-org/pipeline-template.git"
+  },
+  "author": "team@zerobias.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zerobias-org/pipeline-template/issues"
+  },
+  "homepage": "https://github.com/zerobias-org/pipeline-template#readme",
+  "overrides": {
+    "tar": "^7.5.7",
+    "@rollup/plugin-commonjs": "^28.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1"
+  }
+}

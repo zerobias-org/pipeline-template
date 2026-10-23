@@ -1,0 +1,93 @@
+name: "@zerobias-org/pipeline-template"
+version: "1.0.0"
+
+# Dataloader validation runs against an ephemeral Neon Postgres branch
+# provisioned by NeonDataloaderTask at task-execution time (same pattern
+# as vendor / suite / tag). The task creates and deletes its own branch
+# via the Neon API. Templates reference collectorbots (collectorArtifact),
+# products (productId) and, in params.dataMappings, catalog classes and
+# fields (classId, fieldId); the dataloader resolves those during load.
+# ── Shared dev credentials — inherited, not redeclared ───────────────
+# ZB_TOKEN / ZB_API_KEY / ZB_ORG_ID / ZB_PLATFORM_URL / KNOWLEDGE_MCP_URL /
+# NPM_CONFIG_TAG live ONCE per slot on the shared `dev` stack
+# (@zerobias-org/dev-stack, auto-pulled from the registry at
+# `zbb stack add`) and are IMPORTED here — the same depends/imports
+# pattern vendor / suite / product / framework use.
+# ⚠ Never `env set` these six on THIS stack: a per-stack override
+# permanently shadows the import, so credential rotation on the dev
+# stack stops propagating here (zbb never clobbers user overrides).
+depends:
+  dev:
+    package: "@zerobias-org/dev-stack@^1.0.0"
+
+imports:
+  dev:
+    optional: true
+    vars:
+      - ZB_TOKEN
+      - ZB_API_KEY
+      - ZB_ORG_ID
+      - ZB_PLATFORM_URL
+      - KNOWLEDGE_MCP_URL
+      - NPM_CONFIG_TAG
+
+env:
+  DATALOADER_SERVICE_URL:
+    type: string
+    default: "https://app.zerobias.com/api/dataloader"
+    description: >-
+      Dataloader endpoint for the GATE's Neon step (separate from
+      ZB_PLATFORM_URL — the gate does not honor that var). LEAVE ON THE
+      PROD DEFAULT even for non-prod org targets: the step auths with the
+      prod-issued ZB_TOKEN, and a per-env override makes that key 401.
+      The org load never reads this (it uses ZB_PLATFORM_URL + ZB_API_KEY).
+
+  NEON_API_KEY:
+    source: vault
+    vault: "operations-kv/neon/content.api-key"
+    mask: true
+
+  NEON_PROJECT_ID:
+    source: vault
+    vault: "operations-kv/neon/content.project-id"
+
+  NEON_PARENT_BRANCH:
+    type: string
+    default: "content-master"
+    description: Neon parent branch to create test branches from
+
+  NEON_DB_ROLE:
+    type: string
+    default: "neondb_owner"
+    description: Neon database role
+
+  NEON_DB_NAME:
+    type: string
+    default: "zerobias"
+    description: Neon database name
+
+# ── Lifecycle ────────────────────────────────────────────────────────
+# Content repos have no generate/compile/Docker phases, so the chain
+# reduces to validate + dataloader + publishNpm + promote.
+lifecycle:
+  clean:     ./gradlew clean
+  build:     ./gradlew build
+  test:      ./gradlew test
+  gate:      ./gradlew gate
+  gateCheck: ./gradlew gateCheck
+  publish:   ./gradlew publish
+  # Org-first SDLC: publish an org-private rc + queue the org dataloader
+  # job. The -PorgPublish=true flag is what flips the shared publish
+  # pipeline into org mode — zbb does not inject it on its own, and the
+  # zb.base `publishOrg` alias reads the flag at CONFIGURATION time, so
+  # without this entry zbb falls back to a bare `./gradlew publishOrg`
+  # that hard-fails.
+  publishOrg: ./gradlew publishOrg -PorgPublish=true
+
+require:
+  - tool: dataloader
+    check: "dataloader --version 2>&1"
+    parse: "Dataloader v(\\S+)"
+    # pipeline_template artifacts load from dataloader 2.0.111 on
+    version: ">=2.0.111"
+    install: "npm i -g @zerobias-com/platform-dataloader"

@@ -1,0 +1,22 @@
+{
+  "name": "@zerobias-org/pipeline-template-bundle",
+  "version": "0.0.0",
+  "description": "All installable ZeroBias pipeline templates",
+  "author": "team@zerobias.com",
+  "license": "ISC",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zerobias-org/pipeline-template.git",
+    "directory": "bundle/"
+  },
+  "publishConfig": {
+    "registry": "https://pkg.zerobias.org"
+  },
+  "zerobias": {
+    "package": "bundle.all-pipeline-templates",
+    "import-artifact": "bundle",
+    "dataloader-version": "1.0.0"
+  },
+  "dependencies": {}
+}
