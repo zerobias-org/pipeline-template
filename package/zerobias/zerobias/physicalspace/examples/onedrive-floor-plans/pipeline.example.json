@@ -1,0 +1,6 @@
+{
+  "boundaryId": "<boundary to load the floor plan into>",
+  "connectionId": "<Microsoft Graph connection that can read the workbook>",
+  "scopeId": "",
+  "workbookPath": ["/", "sites", "site_<siteId>", "drive_<siteId>/<driveId>", "item_<siteId>/<driveId>/<itemId>"]
+}

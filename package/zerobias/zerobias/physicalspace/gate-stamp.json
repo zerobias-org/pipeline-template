@@ -1,9 +1,8 @@
 {
-  "version": "1.0.0-uat.0",
-  "branch": "feat/physicalspace-dev-gate",
+  "version": "1.0.0-dev.0",
+  "branch": "dev",
   "sourceHash": "6ed6df831efdab1777d949aae4e2a242919409528651736072c989758cfef029",
   "testHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "dataloaderEnv": "dev",
   "tasks": {
     "validate": "passed",
     "lint": "passed",
