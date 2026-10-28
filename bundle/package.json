@@ -1,6 +1,6 @@
 {
   "name": "@zerobias-org/pipeline-template-bundle",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "All installable ZeroBias pipeline templates",
   "author": "team@zerobias.com",
   "license": "ISC",
@@ -18,5 +18,7 @@
     "import-artifact": "bundle",
     "dataloader-version": "1.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@zerobias-org/pipeline-template-zerobias-zerobias-physicalspace": "1.0.0"
+  }
 }
