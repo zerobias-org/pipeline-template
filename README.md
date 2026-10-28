@@ -45,7 +45,9 @@ package/
             ├── .npmrc
             ├── build.gradle.kts           # one-line marker: plugins { id("zb.content") }
             ├── gate-stamp.json            # written by ./gradlew :zerobias:zerobias:physicalspace:gate
-            └── onedrive-floor-plans.yml   # one template per yml; each has its own `id`
+            ├── onedrive-floor-plans.yml   # one template per yml; each has its own `id`
+            └── examples/
+                └── onedrive-floor-plans/  # sample source + how-to for that template (see Examples)
 bundle/                                    # @zerobias-org/pipeline-template-bundle (workflow-managed)
 ```
 
@@ -59,6 +61,19 @@ bundle/                                    # @zerobias-org/pipeline-template-bun
   package). A package with no template yml fails the load.
 - The package must NOT sit directly at `package/`: the publish workflow's
   `detect` job skips the directory literally named `package`.
+
+## Examples
+
+`<package>/examples/<template>/` holds what a user needs to try a template: a
+sample source, how to prepare their own, and how to create the pipeline
+through the API (the UI has no step for creating a pipeline from a template
+yet). The dataloader ignores subdirectories, and package.json `files` leaves
+`examples/` out of the npm package. It is still part of the package source, so
+re-gate after changing it.
+
+| Template | Example |
+|---|---|
+| OneDrive 365 Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/`](package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
 
 ## Template fields
 

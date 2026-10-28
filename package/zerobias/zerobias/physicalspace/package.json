@@ -1,0 +1,29 @@
+{
+  "name": "@zerobias-org/pipeline-template-zerobias-zerobias-physicalspace",
+  "version": "1.0.0",
+  "description": "ZeroBias physical space pipeline templates artifact",
+  "author": "team@zerobias.com",
+  "license": "ISC",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zerobias-org/pipeline-template.git",
+    "directory": "package/zerobias/zerobias/physicalspace"
+  },
+  "publishConfig": {
+    "registry": "https://pkg.zerobias.org"
+  },
+  "files": [
+    "*.yml",
+    "npm-shrinkwrap.json"
+  ],
+  "zerobias": {
+    "package": "zerobias.zerobias.physicalspace.pipeline_template",
+    "dataloader-version": "1.0.0",
+    "import-artifact": "pipeline_template"
+  },
+  "dependencies": {
+    "@auditlogic/schema-zerobias-zerobias-base": "^5.0.0-dev.2",
+    "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.0.14"
+  }
+}
