@@ -85,13 +85,17 @@ the source of truth; see its `README.md`.
 | `id` | yes | new random UUID (`uuidgen`), unique across the repo |
 | `name`, `description` | yes | |
 | `keywords`, `imageUrl` | no | keywords become search aliases |
-| `productId` | yes | a catalog product |
+| `productId`, `productIds` | at least one product or interface | catalog product(s) the template is for |
+| `interface`, `interfaces` | at least one product or interface | interface module(s) by npm name, e.g. `@zerobias-org/module-interface-dataproducer`: the template is also for every product a module implementing one supports, looked up when the template is read. Must be loaded and have a product on the environment, and a caller template's collector must use it. Not a `dependencies` entry |
 | `collectorArtifact` | caller: yes | must be a `dependencies` entry of the package |
 | `executionMode`, `batchMode`, `connectorType` | yes | |
 | `format`, `scopeMode` | no | left unset, the create form asks |
 | `frequency`, `dayOfWeek`, `dayOfMonth`, `monthOfYear`, `executionTime`, `timezone` | no | default schedule; `quarterly` is refused |
 | `params` | no | default params; never secrets (a secret-looking key with a value fails the load) |
 | `links` | no | resource links |
+
+Give both products and interfaces and the template is for all of them. The
+create form asks which one when there are several.
 
 `params.dataMappings` (dynamic collector) are checked like the UI's mapping
 dialog against the environment's classes: live `classId`/`className`,
