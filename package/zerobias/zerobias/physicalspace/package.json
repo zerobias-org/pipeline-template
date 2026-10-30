@@ -23,7 +23,6 @@
     "import-artifact": "pipeline_template"
   },
   "dependencies": {
-    "@auditlogic/schema-zerobias-zerobias-base": "^5.0.0-dev.2",
     "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.0.14"
   }
 }
