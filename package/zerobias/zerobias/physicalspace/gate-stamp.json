@@ -1,8 +1,9 @@
 {
-  "version": "1.0.0-dev.0",
-  "branch": "dev",
-  "sourceHash": "6ed6df831efdab1777d949aae4e2a242919409528651736072c989758cfef029",
+  "version": "1.0.0-uat.0",
+  "branch": "feat/pipeline-template-interfaces",
+  "sourceHash": "28363d4ab9a7fb78180a69d4f2246b87bfa121b1acb17e90aba33e29242f4c08",
   "testHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "dataloaderEnv": "dev",
   "tasks": {
     "validate": "passed",
     "lint": "passed",
@@ -11,7 +12,8 @@
     "testDirect": "passed",
     "testDocker": "passed",
     "testDataloader": "passed",
-    "buildArtifacts": "passed"
+    "buildArtifacts": "passed",
+    "dataloaderExec": "passed"
   },
   "tests": {
       "unit": { "expected": 0, "ran": 0, "status": "skipped" },
