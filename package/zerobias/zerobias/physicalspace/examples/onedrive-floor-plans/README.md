@@ -3,7 +3,8 @@
 The **OneDrive 365 Floor Plans** template
 ([`onedrive-floor-plans.yml`](../../onedrive-floor-plans.yml), id
 `0201bd60-e171-491f-9751-e80be61dd7b3`) loads a floor plan workbook kept in OneDrive or SharePoint into a boundary. It
-reads the workbook through the Microsoft Graph Excel data producer and the dynamic collector, one sheet per class.
+reads the workbook through the Microsoft Graph Excel data producer and the dynamic collector, one sheet per class. The
+template is for every product of the dataproducer interface, so the pipeline names the boundary product it is for.
 
 This folder holds a sample workbook, the drawing it describes, and a script that creates the pipeline through the API,
 because the UI has no step for creating a pipeline from a template yet.
@@ -157,7 +158,7 @@ there: every run reads the workbook as it is at that moment.
 
 **You need:**
 - an environment with the model and the template loaded (dev today)
-- a boundary
+- a boundary, with the product the workbook is in (OneDrive 365, say) added to it: its boundary product
 - a Microsoft Graph connection (OneDrive 365) that can read the workbook. If the connection runs on your own hub node,
   that node must be online whenever the pipeline runs.
 - an API key and your org id, plus `bash`, `curl` and `jq`
@@ -166,7 +167,7 @@ Work in a copy of this folder: the script reads `./pipeline.json` and writes to 
 
 ```bash
 export ZB_PLATFORM_URL=https://ci.zerobias.com/api ZB_API_KEY=<key> ZB_ORG_ID=<org id>
-cp pipeline.example.json pipeline.json     # set boundaryId and connectionId
+cp pipeline.example.json pipeline.json     # set boundaryId, boundaryProductId and connectionId
 ./create-pipeline.sh connection            # status "up", and its scopes (leave scopeId blank if there is one)
 ./create-pipeline.sh browse /              # "sites" = Files & Sites
 ./create-pipeline.sh browse sites          # your site → its drive → folders → the workbook;
@@ -183,7 +184,7 @@ The template carries the mappings but no workbook, so `body` fills in, for each 
 
 | Field | Value |
 |---|---|
-| `context` | `scopeId`, `targetId` = the connection, `productId` = the template's, `boundaryId` |
+| `context` | `scopeId`, `targetId` = the connection, `productId` = the boundary product's, `boundaryId` |
 | `source.objectId` | `sheet_<site>/<drive>/<item>/<Sheet>`: the workbook id with `item_` replaced by `sheet_`, plus `/<Sheet>` |
 | `source.objectPath` | `workbookPath` |
 | `source.schemaId` | `schema:collection:microsoft.azure.msgraph.sheet:<site>/<drive>/<item>/<Sheet>` |
@@ -195,9 +196,10 @@ list with these ids filled in. The calls the script makes (headers `Authorizatio
 | Step | Call |
 |---|---|
 | Template | `GET /portal/pipelineTemplates/0201bd60-e171-491f-9751-e80be61dd7b3` |
+| Boundary product | `GET /platform/boundaries/<boundaryId>/products/<boundaryProductId>` |
 | Connection, scopes | `GET /hub/connections/<connectionId>`, `GET /hub/connections/<connectionId>/scopes` |
 | Browse | `PUT /hub/targets/<connectionId>/getChildren` `{"objectId": "/", "pageSize": 100}` |
-| Create | `POST /platform/boundaries/<boundaryId>/pipelines` with `body.json` |
+| Create | `POST /platform/boundaries/<boundaryId>/pipelines` with `body.json`, whose `boundaryProductId` picks the product |
 | Run | `POST /platform/app/pipelines/<pipelineId>` `{"action": "runOnce"}` |
 | Jobs | `GET /platform/app/pipelines/<pipelineId>/pipelineJobs` |
 | Records | `GET /platform/app/pipelineJobs/<jobId>/objectVersions?pageSize=500` |

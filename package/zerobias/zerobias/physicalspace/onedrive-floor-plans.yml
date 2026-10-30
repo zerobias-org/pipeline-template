@@ -1,5 +1,6 @@
-# Floor plan workbook in OneDrive 365 -> ZeroBias records, through the dynamic collector and the Microsoft Graph
-# Excel data producer. Same mappings as dev's "OneDrive 365 Pipeline" (12743bb5-dfd7-4b46-8b63-11bf68a26737).
+# Floor plan workbook -> ZeroBias records, through the dynamic collector and a data producer: the template is for every
+# product of the dataproducer interface, such as OneDrive 365 through the Microsoft Graph Excel data producer. Same
+# mappings as dev's "OneDrive 365 Pipeline" (12743bb5-dfd7-4b46-8b63-11bf68a26737).
 # Left out, because only a boundary knows them: the workbook (each mapping's source objectId/objectPath/schemaId), the
 # context (boundary/target/scope), targets and the schedule. Set them when you create the pipeline.
 # The mappings run in list order and that order matters: a link's property (planPosition, placement) is only written
@@ -16,7 +17,7 @@ keywords:
   - workbook
   - excel
   - physical space
-productId: 6ffa85fc-4a02-597c-ad12-e5976c6be67f
+interface: "@zerobias-org/module-interface-dataproducer"
 collectorArtifact: "@zerobias-org/collectorbot-zerobias-zerobias-dynamic"
 executionMode: caller
 batchMode: full
