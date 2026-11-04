@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Creates a pipeline from the "OneDrive 365 Floor Plans" template and runs it with curl, for as long as the UI has no
+# Creates a pipeline from the "Floor Plans" template and runs it with curl, for as long as the UI has no
 # step for creating a pipeline from a template. See README.md next to this file.
 #
 # Needs bash, curl and jq, and an API key in the environment:
@@ -21,7 +21,7 @@
 #   create-pipeline.sh restore            points the mappings back at their sheets (as before `wipe`); then `run`
 set -euo pipefail
 
-TEMPLATE=${TEMPLATE:-0201bd60-e171-491f-9751-e80be61dd7b3} # OneDrive 365 Floor Plans
+TEMPLATE=${TEMPLATE:-0201bd60-e171-491f-9751-e80be61dd7b3} # Floor Plans
 NAME=${NAME:-OneDrive 365 Floor Plans}
 CONFIG=${CONFIG:-pipeline.json}
 OUT=${OUT:-pipeline.out}

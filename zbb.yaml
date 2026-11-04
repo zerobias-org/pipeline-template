@@ -88,6 +88,6 @@ require:
   - tool: dataloader
     check: "dataloader --version 2>&1"
     parse: "Dataloader v(\\S+)"
-    # pipeline_template artifacts load from dataloader 2.0.111 on
-    version: ">=2.0.111"
+    # templates that declare an interface load from dataloader 2.0.125 on
+    version: ">=2.0.125"
     install: "npm i -g @zerobias-com/platform-dataloader"

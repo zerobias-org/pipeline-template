@@ -45,7 +45,7 @@ package/
             ├── .npmrc
             ├── build.gradle.kts           # one-line marker: plugins { id("zb.content") }
             ├── gate-stamp.json            # written by ./gradlew :zerobias:zerobias:physicalspace:gate
-            ├── onedrive-floor-plans.yml   # one template per yml; each has its own `id`
+            ├── floor-plans.yml            # one template per yml; each has its own `id`
             └── examples/
                 └── onedrive-floor-plans/  # sample source + how-to for that template (see Examples)
 bundle/                                    # @zerobias-org/pipeline-template-bundle (workflow-managed)
@@ -73,7 +73,7 @@ re-gate after changing it.
 
 | Template | Example |
 |---|---|
-| OneDrive 365 Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/`](package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
+| Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/`](package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
 
 ## Template fields
 
