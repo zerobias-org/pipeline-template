@@ -89,7 +89,7 @@ params:
           transform:
             type: expression
             options:
-              expression: size ? $number(size)
+              expression: size != null ? $number(size)
           destination:
             key: size
             name: size
@@ -213,8 +213,9 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
-                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+              expression: '(`extent.width` != null or `extent.depth` != null) ? { "width": `extent.width` != null ?
+                $number(`extent.width`), "depth": `extent.depth` != null ? $number(`extent.depth`), "unit":
+                `extent.unit` ? `extent.unit` }'
           destination:
             key: extent
             name: extent
@@ -244,10 +245,11 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`calibration.originX` or `calibration.originY` or `calibration.imageWidth` or `calibration.imageHeight`) ?
-                { "originX": `calibration.originX` ? $number(`calibration.originX`), "originY": `calibration.originY` ?
-                $number(`calibration.originY`), "imageWidth": `calibration.imageWidth` ?
-                $number(`calibration.imageWidth`), "imageHeight": `calibration.imageHeight` ?
+              expression: '(`calibration.originX` != null or `calibration.originY` != null or `calibration.imageWidth`
+                != null or `calibration.imageHeight` != null) ? { "originX": `calibration.originX` != null ?
+                $number(`calibration.originX`), "originY": `calibration.originY` != null ?
+                $number(`calibration.originY`), "imageWidth": `calibration.imageWidth` != null ?
+                $number(`calibration.imageWidth`), "imageHeight": `calibration.imageHeight` != null ?
                 $number(`calibration.imageHeight`) }'
           destination:
             key: calibration
@@ -407,8 +409,9 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
-                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+              expression: '(`extent.width` != null or `extent.depth` != null) ? { "width": `extent.width` != null ?
+                $number(`extent.width`), "depth": `extent.depth` != null ? $number(`extent.depth`), "unit":
+                `extent.unit` ? `extent.unit` }'
           destination:
             key: extent
             name: extent
@@ -466,10 +469,10 @@ params:
           transform:
             type: expression
             options:
-              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
-                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
-                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
-                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+              expression: 'placedIn ? ((`placedIn.placement.x` != null or `placedIn.placement.y` != null) ? { "id":
+                placedIn, "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` != null ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` != null ? $number(`placedIn.placement.y`),
+                "unit": `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
           destination:
             key: placedIn
             name: placedIn
@@ -503,12 +506,12 @@ params:
           transform:
             type: expression
             options:
-              expression: 'canvases ? ($ids := $split(canvases, " | "); $x := $split(`canvases.planPosition.x`, " | "); $y :=
-                $split(`canvases.planPosition.y`, " | "); $w := $split(`canvases.planPosition.width`, " | "); $h :=
-                $split(`canvases.planPosition.height`, " | "); [$map($ids, function($id, $i) { ($x[$i] or $y[$i] or
-                $w[$i] or $h[$i]) ? { "id": $id, "zerobias_zerobias_base_schema_planPosition": { "x": $x[$i] ?
-                $number($x[$i]), "y": $y[$i] ? $number($y[$i]), "width": $w[$i] ? $number($w[$i]), "height": $h[$i] ?
-                $number($h[$i]) } } : $id })])'
+              expression: 'canvases ? ($sp := function($v) { $v != null ? $split($string($v), " | ") }; $ids :=
+                $sp(canvases); $x := $sp(`canvases.planPosition.x`); $y := $sp(`canvases.planPosition.y`); $w :=
+                $sp(`canvases.planPosition.width`); $h := $sp(`canvases.planPosition.height`); [$map($ids, function($id,
+                $i) { ($x[$i] or $y[$i] or $w[$i] or $h[$i]) ? { "id": $id,
+                "zerobias_zerobias_base_schema_planPosition": { "x": $x[$i] ? $number($x[$i]), "y": $y[$i] ?
+                $number($y[$i]), "width": $w[$i] ? $number($w[$i]), "height": $h[$i] ? $number($h[$i]) } } : $id })])'
           destination:
             key: canvases
             name: canvases
@@ -685,8 +688,9 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
-                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+              expression: '(`extent.width` != null or `extent.depth` != null) ? { "width": `extent.width` != null ?
+                $number(`extent.width`), "depth": `extent.depth` != null ? $number(`extent.depth`), "unit":
+                `extent.unit` ? `extent.unit` }'
           destination:
             key: extent
             name: extent
@@ -716,10 +720,10 @@ params:
           transform:
             type: expression
             options:
-              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
-                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
-                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
-                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+              expression: 'placedIn ? ((`placedIn.placement.x` != null or `placedIn.placement.y` != null) ? { "id":
+                placedIn, "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` != null ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` != null ? $number(`placedIn.placement.y`),
+                "unit": `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
           destination:
             key: placedIn
             name: placedIn
@@ -749,11 +753,11 @@ params:
           transform:
             type: expression
             options:
-              expression: 'connects ? ($ids := $split(connects, " | "); $s := $split(`connects.spaceAccess.side`, " | "); $h :=
-                $split(`connects.spaceAccess.hinge`, " | "); $w := $split(`connects.spaceAccess.swing`, " | ");
-                [$map($ids, function($id, $i) { ($s[$i] or $h[$i] or $w[$i]) ? { "id": $id,
-                "zerobias_zerobias_base_schema_spaceAccess": { "side": $s[$i] ? $s[$i], "hinge": $h[$i] ? $h[$i],
-                "swing": $w[$i] ? $w[$i] } } : $id })])'
+              expression: 'connects ? ($sp := function($v) { $v != null ? $split($string($v), " | ") }; $ids :=
+                $sp(connects); $s := $sp(`connects.spaceAccess.side`); $h := $sp(`connects.spaceAccess.hinge`); $w :=
+                $sp(`connects.spaceAccess.swing`); [$map($ids, function($id, $i) { ($s[$i] or $h[$i] or $w[$i]) ? {
+                "id": $id, "zerobias_zerobias_base_schema_spaceAccess": { "side": $s[$i] ? $s[$i], "hinge": $h[$i] ?
+                $h[$i], "swing": $w[$i] ? $w[$i] } } : $id })])'
           destination:
             key: connects
             name: connects
@@ -904,7 +908,7 @@ params:
           transform:
             type: expression
             options:
-              expression: virtual ? ($lowercase(virtual) = "true")
+              expression: virtual != null ? ($lowercase($string(virtual)) = "true")
           destination:
             key: virtual
             name: virtual
@@ -930,8 +934,9 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
-                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+              expression: '(`extent.width` != null or `extent.depth` != null) ? { "width": `extent.width` != null ?
+                $number(`extent.width`), "depth": `extent.depth` != null ? $number(`extent.depth`), "unit":
+                `extent.unit` ? `extent.unit` }'
           destination:
             key: extent
             name: extent
@@ -989,10 +994,10 @@ params:
           transform:
             type: expression
             options:
-              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
-                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
-                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
-                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+              expression: 'placedIn ? ((`placedIn.placement.x` != null or `placedIn.placement.y` != null) ? { "id":
+                placedIn, "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` != null ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` != null ? $number(`placedIn.placement.y`),
+                "unit": `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
           destination:
             key: placedIn
             name: placedIn
@@ -1151,8 +1156,9 @@ params:
           transform:
             type: expression
             options:
-              expression: '(`extent.width` or `extent.depth`) ? { "width": `extent.width` ? $number(`extent.width`), "depth":
-                `extent.depth` ? $number(`extent.depth`), "unit": `extent.unit` ? `extent.unit` }'
+              expression: '(`extent.width` != null or `extent.depth` != null) ? { "width": `extent.width` != null ?
+                $number(`extent.width`), "depth": `extent.depth` != null ? $number(`extent.depth`), "unit":
+                `extent.unit` ? `extent.unit` }'
           destination:
             key: extent
             name: extent
@@ -1182,10 +1188,10 @@ params:
           transform:
             type: expression
             options:
-              expression: 'placedIn ? ((`placedIn.placement.x` or `placedIn.placement.y`) ? { "id": placedIn,
-                "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` ?
-                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` ? $number(`placedIn.placement.y`), "unit":
-                `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
+              expression: 'placedIn ? ((`placedIn.placement.x` != null or `placedIn.placement.y` != null) ? { "id":
+                placedIn, "zerobias_zerobias_base_schema_placement": { "x": `placedIn.placement.x` != null ?
+                $number(`placedIn.placement.x`), "y": `placedIn.placement.y` != null ? $number(`placedIn.placement.y`),
+                "unit": `placedIn.placement.unit` ? `placedIn.placement.unit` } } : placedIn)'
           destination:
             key: placedIn
             name: placedIn

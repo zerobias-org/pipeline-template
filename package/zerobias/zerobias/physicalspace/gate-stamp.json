@@ -1,9 +1,8 @@
 {
   "version": "1.0.0-uat.0",
-  "branch": "feat/pipeline-template-interfaces",
-  "sourceHash": "28363d4ab9a7fb78180a69d4f2246b87bfa121b1acb17e90aba33e29242f4c08",
+  "branch": "fix/floor-plans-typed-cells",
+  "sourceHash": "1f0ad76a1569aacd374ddb52930fb4d0458292ceba901b09ccd671788cf635c0",
   "testHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "dataloaderEnv": "dev",
   "tasks": {
     "validate": "passed",
     "lint": "passed",
