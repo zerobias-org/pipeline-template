@@ -121,9 +121,10 @@ boundary knows them, and the load refuses them.
 package identity, unique ids) and `testIntegrationDataloader`, which loads
 every template against an ephemeral Neon Postgres branch. Without
 `NEON_API_KEY` / `NEON_PROJECT_ID` the dataloader step is skipped locally; CI
-re-runs it on push. Templates load from dataloader **2.0.111** on. Commit the
-refreshed `gate-stamp.json` whenever package contents change, after staging
-the files (the stamp hashes `git ls-files`).
+re-runs it on push. Templates load from dataloader **2.0.111** on, and a
+template that declares `interface` from **2.0.125** on. Commit the refreshed
+`gate-stamp.json` whenever package contents change, after staging the files
+(the stamp hashes `git ls-files`).
 
 ## Publishing
 
