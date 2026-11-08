@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-uat.0",
   "branch": "fix/floor-plans-typed-cells",
-  "sourceHash": "96fe73ccc8910084b0d8280774cc1dadcae0dd863ff69f9d6dc133ffde797b81",
+  "sourceHash": "32a935cdaf98ec03a34bd6e84adee5d84ae072aae3c2483be667b36262d31e60",
   "testHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "tasks": {
     "validate": "passed",

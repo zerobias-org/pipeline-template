@@ -22,7 +22,7 @@
 set -euo pipefail
 
 TEMPLATE=${TEMPLATE:-0201bd60-e171-491f-9751-e80be61dd7b3} # Floor Plans
-NAME=${NAME:-OneDrive 365 Floor Plans}
+NAME=${NAME:-Floor Plans}
 CONFIG=${CONFIG:-pipeline.json}
 OUT=${OUT:-pipeline.out}
 : "${ZB_PLATFORM_URL:?set ZB_PLATFORM_URL, e.g. https://ci.zerobias.com/api}" "${ZB_API_KEY:?set ZB_API_KEY}" \

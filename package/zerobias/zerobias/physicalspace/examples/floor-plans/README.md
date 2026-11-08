@@ -1,4 +1,4 @@
-# Floor Plans from OneDrive 365: example and how-to
+# Floor Plans: example and how-to
 
 The **Floor Plans** template
 ([`floor-plans.yml`](../../floor-plans.yml), id
