@@ -1,10 +1,11 @@
-# OneDrive 365 Floor Plans: example and how-to
+# Floor Plans: example and how-to
 
-The **OneDrive 365 Floor Plans** template
-([`onedrive-floor-plans.yml`](../../onedrive-floor-plans.yml), id
-`0201bd60-e171-491f-9751-e80be61dd7b3`) loads a floor plan workbook kept in OneDrive or SharePoint into a boundary. It
-reads the workbook through the Microsoft Graph Excel data producer and the dynamic collector, one sheet per class. The
-template is for every product of the dataproducer interface, so the pipeline names the boundary product it is for.
+The **Floor Plans** template
+([`floor-plans.yml`](../../floor-plans.yml), id
+`0201bd60-e171-491f-9751-e80be61dd7b3`) loads a floor plan workbook into a boundary, one sheet per class, through the
+dynamic collector and a data producer. This example keeps the workbook in OneDrive or SharePoint and reads it through
+the Microsoft Graph Excel data producer. The template is for every product of the dataproducer interface, so the
+pipeline names the boundary product it is for.
 
 This folder holds a sample workbook, the drawing it describes, and a script that creates the pipeline through the API,
 because the UI has no step for creating a pipeline from a template yet.

@@ -45,9 +45,9 @@ package/
             ├── .npmrc
             ├── build.gradle.kts           # one-line marker: plugins { id("zb.content") }
             ├── gate-stamp.json            # written by ./gradlew :zerobias:zerobias:physicalspace:gate
-            ├── onedrive-floor-plans.yml   # one template per yml; each has its own `id`
+            ├── floor-plans.yml            # one template per yml; each has its own `id`
             └── examples/
-                └── onedrive-floor-plans/  # sample source + how-to for that template (see Examples)
+                └── floor-plans/  # sample source + how-to for that template (see Examples)
 bundle/                                    # @zerobias-org/pipeline-template-bundle (workflow-managed)
 ```
 
@@ -73,7 +73,7 @@ re-gate after changing it.
 
 | Template | Example |
 |---|---|
-| OneDrive 365 Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/`](package/zerobias/zerobias/physicalspace/examples/onedrive-floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
+| Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/floor-plans/`](package/zerobias/zerobias/physicalspace/examples/floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
 
 ## Template fields
 
@@ -121,9 +121,10 @@ boundary knows them, and the load refuses them.
 package identity, unique ids) and `testIntegrationDataloader`, which loads
 every template against an ephemeral Neon Postgres branch. Without
 `NEON_API_KEY` / `NEON_PROJECT_ID` the dataloader step is skipped locally; CI
-re-runs it on push. Templates load from dataloader **2.0.111** on. Commit the
-refreshed `gate-stamp.json` whenever package contents change, after staging
-the files (the stamp hashes `git ls-files`).
+re-runs it on push. Templates load from dataloader **2.0.111** on, and a
+template that declares `interface` from **2.0.125** on. Commit the refreshed
+`gate-stamp.json` whenever package contents change, after staging the files
+(the stamp hashes `git ls-files`).
 
 ## Publishing
 
