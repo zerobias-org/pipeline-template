@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Creates a pipeline from the "OneDrive 365 Floor Plans" template and runs it with curl, for as long as the UI has no
+# Creates a pipeline from the "Floor Plans" template and runs it with curl, for as long as the UI has no
 # step for creating a pipeline from a template. See README.md next to this file.
 #
 # Needs bash, curl and jq, and an API key in the environment:
@@ -7,7 +7,8 @@
 #   ZB_API_KEY       an API key of a user of the org that owns the boundary
 #   ZB_ORG_ID        that org's id
 # Your ids go in a JSON file (CONFIG, default ./pipeline.json; copy pipeline.example.json):
-#   boundaryId, connectionId, scopeId (blank: the connection's only scope), workbookPath (ids from "/" to the workbook)
+#   boundaryId, boundaryProductId (the boundary's product the workbook is in), connectionId, scopeId (blank: the
+#   connection's only scope), workbookPath (ids from "/" to the workbook)
 #
 #   create-pipeline.sh browse [objectId]  children of an object seen through the connection ("/" by default)
 #   create-pipeline.sh connection         the connection's status and scopes
@@ -20,8 +21,8 @@
 #   create-pipeline.sh restore            points the mappings back at their sheets (as before `wipe`); then `run`
 set -euo pipefail
 
-TEMPLATE=${TEMPLATE:-0201bd60-e171-491f-9751-e80be61dd7b3} # OneDrive 365 Floor Plans
-NAME=${NAME:-OneDrive 365 Floor Plans}
+TEMPLATE=${TEMPLATE:-0201bd60-e171-491f-9751-e80be61dd7b3} # Floor Plans
+NAME=${NAME:-Floor Plans}
 CONFIG=${CONFIG:-pipeline.json}
 OUT=${OUT:-pipeline.out}
 : "${ZB_PLATFORM_URL:?set ZB_PLATFORM_URL, e.g. https://ci.zerobias.com/api}" "${ZB_API_KEY:?set ZB_API_KEY}" \
@@ -57,20 +58,21 @@ case ${1:-} in
     ;;
   body)
     api GET "/portal/pipelineTemplates/$TEMPLATE" >"$OUT/template.json"
+    product=$(api GET "/platform/boundaries/$(config .boundaryId)/products/$(config .boundaryProductId)" | jq -er .productId)
     jq -n --slurpfile template "$OUT/template.json" --slurpfile config "$CONFIG" --arg scope "$(scope_id)" \
-      --arg name "$NAME" '
+      --arg name "$NAME" --arg product "$product" '
       $template[0] as $t | $config[0] as $c
       | ($c.workbookPath[-1] | sub("^item_"; "")) as $workbook
-      | {pipelineTemplateId: $t.id, name: $name,
+      | {pipelineTemplateId: $t.id, name: $name, boundaryProductId: $c.boundaryProductId,
          targets: {"module-interface-dataproducer": $scope},
          scopeMode: "selected", selectedScopes: {scopes: [$scope]},
          params: {dataMappings: [$t.params.dataMappings[]
-           | . + {context: {scopeId: $scope, targetId: $c.connectionId, productId: $t.productId, boundaryId: $c.boundaryId},
+           | . + {context: {scopeId: $scope, targetId: $c.connectionId, productId: $product, boundaryId: $c.boundaryId},
                   source: (.source + {objectId: "sheet_\($workbook)/\(.source.objectName)",
                                       objectPath: $c.workbookPath,
                                       schemaId: "schema:collection:microsoft.azure.msgraph.sheet:\($workbook)/\(.source.objectName)"})}]}}
     ' >"$OUT/body.json"
-    jq '{pipelineTemplateId, name, targets, sheets: [.params.dataMappings[].source.objectName]}' "$OUT/body.json"
+    jq '{pipelineTemplateId, name, boundaryProductId, targets, sheets: [.params.dataMappings[].source.objectName]}' "$OUT/body.json"
     ;;
   create)
     if [[ -s "$OUT/pipeline-id" && -z "${FORCE:-}" ]]; then
