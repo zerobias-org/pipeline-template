@@ -3,7 +3,7 @@
 Open-source **pipeline template** content artifacts under `@zerobias-org`. A
 template is a catalog recipe for a pipeline: users find it in the catalog and
 add it to one of their boundaries on demand, then fill in what only that
-boundary knows (connection, scopes, workbook or other source objects,
+boundary knows (connection, scopes, source objects the template doesn't ship,
 schedule). Templates never run by themselves.
 
 This is not the [pipeline](https://github.com/zerobias-org/pipeline) repo: a
@@ -16,12 +16,14 @@ a `pipeline_template` is installed by users and configured per boundary.
 package/<vendor>/<product>/*.yml
     │  publish (npm) → release event → dataloader (import-artifact: pipeline_template)
     ▼
-catalog.pipeline_template          validated on load, one row per yml, keyed by its id
+catalog.pipeline_template          validated on load, one row per yml, keyed by its id;
+    │                              zerobias.catalog-files stored in file-service's shared catalog
     │  portal-api: POST /pipelineTemplateSearch, GET /pipelineTemplates/{id}
     ▼
 POST /boundaries/{boundaryId}/pipelines  { pipelineTemplateId, targets, selectedScopes, params, … }
     │  newest collector bot in the template's range; request values override
-    │  the template's; params merge shallowly ({...template.params, ...body.params})
+    │  the template's; params merge shallowly ({...template.params, ...body.params});
+    │  each params.requiredFiles copy attached to the pipeline (see Files a template ships)
     ▼
 app.pipeline  (linked is_instance_of → template)
 ```
@@ -42,12 +44,14 @@ package/
             ├── package.json               #   zerobias.package = zerobias.zerobias.physicalspace.pipeline_template
             │                              #   zerobias.import-artifact = pipeline_template
             │                              #   dependencies: every collectorArtifact + its semver range
+            │                              #   files + zerobias.catalog-files: the files the templates ship
             ├── .npmrc
             ├── build.gradle.kts           # one-line marker: plugins { id("zb.content") }
             ├── gate-stamp.json            # written by ./gradlew :zerobias:zerobias:physicalspace:gate
             ├── floor-plans.yml            # one template per yml; each has its own `id`
-            └── examples/
-                └── floor-plans/  # sample source + how-to for that template (see Examples)
+            └── files/                     # what floor-plans.yml ships (see Files a template ships)
+                ├── floorplan.xlsx
+                └── floorplan.webp
 bundle/                                    # @zerobias-org/pipeline-template-bundle (workflow-managed)
 ```
 
@@ -62,18 +66,35 @@ bundle/                                    # @zerobias-org/pipeline-template-bun
 - The package must NOT sit directly at `package/`: the publish workflow's
   `detect` job skips the directory literally named `package`.
 
-## Examples
+## Files a template ships
 
-`<package>/examples/<template>/` holds what a user needs to try a template: a
-sample source, how to prepare their own, and how to create the pipeline
-through the API (the UI has no step for creating a pipeline from a template
-yet). The dataloader ignores subdirectories, and package.json `files` leaves
-`examples/` out of the npm package. It is still part of the package source, so
-re-gate after changing it.
+A template can ship the files its mappings read, so a pipeline created from it
+is ready to run. Users overwrite them from the UI.
 
-| Template | Example |
+- **`params.requiredFiles`** lists them, each `{ name, description?, mimeType?, path? }`:
+  `name` is the file name the pipeline's copy gets, and `path` the
+  package-relative path of the copy the template publishes.
+- **Publishing:** list each file in package.json `files` (npm leaves anything
+  else out of the package) and in `zerobias.catalog-files`, glob patterns from
+  the package root (com/platform `dataloader/src/importer/CatalogFiles.ts`).
+  Every load of the template then stores them in file-service's shared
+  catalog; a pattern that matches no file is logged as a warning. Keep them in
+  a subfolder such as `files/`: only the root `*.yml` files are templates.
+- **At create**, the platform copies each `path` into the new pipeline's files
+  folder under `name`, attaches it, and links every mapping source that names
+  it. A source names the file and its container, never a `fileId`, which the
+  platform fills in:
+  `source: { file: { name: floorplan.xlsx, containerPath: /File }, objectName: File }`.
+- **In mapping expressions**, `$files` holds the pipeline's attached files, as
+  the dynamic collector binds it next to `$pipelineId`: keyed by file name,
+  each with its current version's `fileId`, `fileVersionId`, `name`, `size` and
+  `mimeType`.
+
+The files are part of the package source, so re-gate after changing them.
+
+| Template | Files |
 |---|---|
-| Floor Plans | [`package/zerobias/zerobias/physicalspace/examples/floor-plans/`](package/zerobias/zerobias/physicalspace/examples/floor-plans/README.md): workbook, drawing, `create-pipeline.sh` |
+| Floor Plans | [`package/zerobias/zerobias/physicalspace/files/`](package/zerobias/zerobias/physicalspace/README.md#the-files-it-ships): `floorplan.xlsx` (workbook), `floorplan.webp` (drawing) |
 
 ## Template fields
 
@@ -102,7 +123,8 @@ dialog against the environment's classes: live `classId`/`className`,
 destination keys and `fieldId`s that are properties of the class, every
 required property mapped, known transform types, JSONata that compiles. Leave
 out `context` and each source's `objectId`/`objectPath`/`schemaId`: only a
-boundary knows them, and the load refuses them.
+boundary knows them, and the load refuses them. A source that reads a file the
+template ships names it instead (see Files a template ships).
 
 ## Build & validate (gradle + zbb)
 

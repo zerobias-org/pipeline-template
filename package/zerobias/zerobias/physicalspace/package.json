@@ -15,12 +15,18 @@
   },
   "files": [
     "*.yml",
+    "files/floorplan.xlsx",
+    "files/floorplan.webp",
     "npm-shrinkwrap.json"
   ],
   "zerobias": {
     "package": "zerobias.zerobias.physicalspace.pipeline_template",
     "dataloader-version": "1.0.0",
-    "import-artifact": "pipeline_template"
+    "import-artifact": "pipeline_template",
+    "catalog-files": [
+      "files/floorplan.xlsx",
+      "files/floorplan.webp"
+    ]
   },
   "dependencies": {
     "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.1.2"
