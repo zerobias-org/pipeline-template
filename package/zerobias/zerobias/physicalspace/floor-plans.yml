@@ -1,8 +1,10 @@
-# Floor plan workbook -> ZeroBias records, through the dynamic collector and a data producer: the template is for every
-# product of the dataproducer interface, e.g. OneDrive 365 through the Microsoft Graph Excel data producer, or ZeroBias
-# through fileservice.
-# Left out, because only a boundary knows them: the workbook (each mapping's source objectId/objectPath/schemaId), the
-# context (boundary/target/scope), targets and the schedule. Set them when you create the pipeline.
+# Floor plan workbook -> ZeroBias records, through the dynamic collector: the template is for every product of the
+# dataproducer interface.
+# It ships its files (params.requiredFiles, published from files/): a pipeline created from it gets its own copies, each
+# mapping's source linked to floorplan.xlsx, and the File mapping reads the drawing's version through $files while
+# floorplan.webp is attached (see README.md).
+# Left out, because only a boundary knows them: the context (boundary/target/scope), targets and the schedule. Set them
+# when you create the pipeline.
 # The mappings run in list order and that order matters: a link's property (planPosition, placement) is only written
 # from the row that holds it, so File and FloorPlan load before the spaces, and spaces before what they contain.
 # Needs the Drawable/Canvas model of the base schema (auditlogic/schema PR #228) on the environment.
@@ -13,7 +15,8 @@ id: 0201bd60-e171-491f-9751-e80be61dd7b3
 name: Floor Plans
 description: "Loads a floor plan workbook into ZeroBias records, one mapping per sheet: File,
   FloorPlan, PhysicalSpace, PhysicalOpening, PhysicalAsset and PhysicalObject, with their canvases, placement and
-  opening links. Choose the workbook, boundary and targets when you create the pipeline."
+  opening links. A pipeline created from it gets its own copy of the sample workbook and drawing; overwrite them with
+  your floor plan. Choose the boundary and targets when you create the pipeline."
 keywords:
   - floor plan
   - workbook
@@ -28,9 +31,21 @@ format: json
 connectorType: dynamic
 scopeMode: selected
 params:
+  requiredFiles:
+    - name: floorplan.xlsx
+      description: The floor plan workbook, one sheet per mapping.
+      mimeType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      path: files/floorplan.xlsx
+    - name: floorplan.webp
+      description: The floor plan drawing the File sheet describes.
+      mimeType: image/webp
+      path: files/floorplan.webp
   dataMappings:
     - id: mapping_floorplan_file
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /File
         objectName: File
       mappings:
         - id: file_id
@@ -58,7 +73,9 @@ params:
             type: string
             level: 0
           transform:
-            type: direct
+            type: expression
+            options:
+              expression: '($f := $lookup($files, "floorplan.webp"); $f ? $f.name : (name ? name))'
           destination:
             key: name
             name: name
@@ -76,7 +93,8 @@ params:
           transform:
             type: expression
             options:
-              expression: fileVersionId ? $trim(fileVersionId)
+              expression: '($f := $lookup($files, "floorplan.webp"); $f ? $f.fileVersionId : (fileVersionId ?
+                $trim(fileVersionId)))'
           destination:
             key: fileVersionId
             name: fileVersionId
@@ -94,7 +112,8 @@ params:
           transform:
             type: expression
             options:
-              expression: size != null ? $number(size)
+              expression: '($f := $lookup($files, "floorplan.webp"); $f ? ($f.size != null ? $number($f.size)) : (size
+                != null ? $number(size)))'
           destination:
             key: size
             name: size
@@ -130,7 +149,8 @@ params:
           transform:
             type: expression
             options:
-              expression: mimeType ? mimeType
+              expression: '($f := $lookup($files, "floorplan.webp"); $f ? ($f.mimeType ? $f.mimeType) : (mimeType ?
+                mimeType))'
           destination:
             key: mimeType
             name: mimeType
@@ -143,12 +163,15 @@ params:
         name: File sheet
         createdAt: 2026-10-13T00:00:00.000Z
         description: "floorplan.xlsx / File: one row per drawing file. Blank cell = not set. fileVersionId and size are required
-          by the class."
+          by the class. While floorplan.webp is attached, name, fileVersionId, size and mimeType come from it."
       destination:
         classId: 79a6b04d-2aae-53c0-910f-482c562e3665
         className: File
     - id: mapping_floorplan_floorplan
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /FloorPlan
         objectName: FloorPlan
       mappings:
         - id: fp_id
@@ -293,6 +316,9 @@ params:
         className: FloorPlan
     - id: mapping_floorplan_physicalspace
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /PhysicalSpace
         objectName: PhysicalSpace
       mappings:
         - id: ps_id
@@ -540,6 +566,9 @@ params:
         className: PhysicalSpace
     - id: mapping_floorplan_physicalopening
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /PhysicalOpening
         objectName: PhysicalOpening
       mappings:
         - id: po_id
@@ -789,6 +818,9 @@ params:
         className: PhysicalOpening
     - id: mapping_floorplan_physicalasset
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /PhysicalAsset
         objectName: PhysicalAsset
       mappings:
         - id: pa_id
@@ -1032,6 +1064,9 @@ params:
         className: PhysicalAsset
     - id: mapping_floorplan_physicalobject
       source:
+        file:
+          name: floorplan.xlsx
+          containerPath: /PhysicalObject
         objectName: PhysicalObject
       mappings:
         - id: pobj_id
