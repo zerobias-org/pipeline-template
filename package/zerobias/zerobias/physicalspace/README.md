@@ -151,8 +151,8 @@ While the pipeline has `floorplan.webp` attached, the File row takes its `name`,
 `name`, `size` and `mimeType`. So the File record describes the drawing's current version, and follows it when you
 overwrite the drawing.
 
-The row's own cells are read only without the attachment, or on a collector that does not bind `$files`; in the
-sample they hold a placeholder `fileVersionId` and the name `.floorplan.webp`. Every File row takes the attached
+The row's own cells are read only while no drawing is attached; in the sample they hold a placeholder
+`fileVersionId`. The template needs dynamic collector 1.1.7 or later, the first that binds `$files`. Every File row takes the attached
 drawing, so keep one File row. If you have no drawing, delete the File row and leave `FloorPlan.file` blank. A File
 row without a `fileVersionId` is rejected; the run still loads every other row and ends with status `warning`.
 

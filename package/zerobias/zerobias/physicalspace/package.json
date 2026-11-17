@@ -29,6 +29,6 @@
     ]
   },
   "dependencies": {
-    "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.1.2"
+    "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.1.7"
   }
 }
