@@ -20,12 +20,23 @@ into a boundary through the dynamic collector, one sheet per class.
 | [files/floorplan.xlsx](files/floorplan.xlsx) | Sample workbook: plan A of a house, 103 records. Its `_README` sheet sums up the format. |
 | [files/floorplan.webp](files/floorplan.webp) | The drawing the workbook describes (2048 × 2048 px) |
 
-The template lists both in `params.requiredFiles`, and `package.json` lists them in `files` and
-`zerobias.catalog-files`, so every load of the template stores them in fileservice's shared catalog. A pipeline
-created from the template gets its own copies, attached as `floorplan.xlsx` and `floorplan.webp`. Each mapping's
-source names the workbook and its sheet, such as `file: { name: floorplan.xlsx, containerPath: /File }` for the File
-sheet, and the platform links it to the pipeline's copy, so the new pipeline is ready to run and loads the sample. To
-load your own floor plan, overwrite the two files from the pipeline in the UI: every run reads their current versions.
+The template declares two file bindings in `params.fileBindings`, named slots its mappings read a file through, and
+ships each file as a binding's `sample`:
+
+| Binding | Accepts | Sample |
+|---|---|---|
+| `floorplanSpreadsheet` | `.xlsx` workbooks | `files/floorplan.xlsx` |
+| `floorplanImage` | images (`image/*`, `.webp`, `.png`, `.jpg`, `.jpeg`, `.svg`) | `files/floorplan.webp` |
+
+`package.json` lists both samples in `files` and `zerobias.catalog-files`, so every load of the template stores them in
+fileservice's shared catalog. A pipeline created from the template gets its own copies, marked as samples, and each
+binding points at its copy. Every mapping's source names the binding and its sheet, such as
+`file: { binding: floorplanSpreadsheet, containerPath: /File }` for the File sheet, so the new pipeline is ready to
+run and loads the sample.
+
+To load your own floor plan, add your files to the pipeline in the UI and point the two bindings at them; your files
+keep their own names. Every run reads the current version of the file each binding points at. The pipeline can't run
+while a binding has no file.
 
 ![Plan A](files/floorplan.webp)
 
@@ -145,14 +156,15 @@ don't track as assets. Both sheets take the same columns, except that only Physi
 
 #### The drawing
 
-While the pipeline has `floorplan.webp` attached, the File row takes its `name`, `fileVersionId`, `size` and
-`mimeType` from the drawing, not from its cells. They come from `$files`, which the dynamic collector binds next to
-`$pipelineId`: the pipeline's attached files by name, each with its current version's `fileId`, `fileVersionId`,
-`name`, `size` and `mimeType`. So the File record describes the drawing's current version, and follows it when you
-overwrite the drawing.
+While the `floorplanImage` binding has a file, the File row takes its `name`, `fileVersionId`, `size` and `mimeType`
+from the drawing, not from its cells. They come from `$bindings`, which the dynamic collector binds next to
+`$pipelineId`: the pipeline's file bindings by name, each with its file's current `fileId`, `fileVersionId`, `name`,
+`size` and `mimeType`. So the File record describes the drawing's current version, and follows it when you upload a new
+version or point the binding at another drawing.
 
-The row's own cells are read only while no drawing is attached; in the sample they hold a placeholder
-`fileVersionId`. The template needs dynamic collector 1.1.7 or later, the first that binds `$files`. Every File row takes the attached
+The row's own cells are read only while the collector has no drawing for the binding, as in a job that doesn't collect
+the files; in the sample they hold a placeholder `fileVersionId`. The template needs a dynamic collector that binds
+`$bindings`. Every File row takes the attached
 drawing, so keep one File row. If you have no drawing, delete the File row and leave `FloorPlan.file` blank. A File
 row without a `fileVersionId` is rejected; the run still loads every other row and ends with status `warning`.
 
