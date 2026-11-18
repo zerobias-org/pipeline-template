@@ -102,10 +102,11 @@ A package names the file that documents its templates, usually its README, in
 `zerobias.documentation` (a path from the package root); a template file can
 name its own with a top-level `documentation:` key, which takes the package's
 place. Every load stores the file in file-service's shared catalog with the
-files it links, and links the template and the version it writes to it
-(`documented_by`). The template, its versions and every pipeline created from
-it then serve it as `documentation`, which the UI opens in its file viewer; its
-links already point at the catalog.
+files it links, and links the version it writes to it (`documented_by`):
+documentation is per version. That version, the template's `latestVersion`
+while it is the latest, and every pipeline created from it then serve it as
+`documentation`, which the UI opens in its file viewer; its links already point
+at the catalog.
 
 - **Publishing:** npm always includes `README.md`. A file it links, or another
   documentation file, must be in package.json `files`, or the link stays as
@@ -137,7 +138,7 @@ the source of truth; see its `README.md`.
 | `frequency`, `dayOfWeek`, `dayOfMonth`, `monthOfYear`, `executionTime`, `timezone` | no | default schedule; `quarterly` is refused |
 | `params` | no | default params; never secrets (a secret-looking key with a value fails the load) |
 | `links` | no | resource links |
-| `documentation` | no | the package file that documents the template, such as `README.md`; else the package's `zerobias.documentation` (see Documentation) |
+| `documentation` | no | the package file that documents the template's version, such as `README.md`; else the package's `zerobias.documentation` (see Documentation) |
 
 Give both products and interfaces and the template is for all of them. The
 create form asks which one when there are several.
