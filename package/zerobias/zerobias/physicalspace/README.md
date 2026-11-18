@@ -163,8 +163,8 @@ from the drawing, not from its cells. They come from `$bindings`, which the dyna
 version or point the binding at another drawing.
 
 The row's own cells are read only while the collector has no drawing for the binding, as in a job that doesn't collect
-the files; in the sample they hold a placeholder `fileVersionId`. The template needs a dynamic collector that binds
-`$bindings`. Every File row takes the attached
+the files; in the sample they hold a placeholder `fileVersionId`. The template needs dynamic collector 1.1.8 or
+later, the first that binds `$bindings`. Every File row takes the attached
 drawing, so keep one File row. If you have no drawing, delete the File row and leave `FloorPlan.file` blank. A File
 row without a `fileVersionId` is rejected; the run still loads every other row and ends with status `warning`.
 
