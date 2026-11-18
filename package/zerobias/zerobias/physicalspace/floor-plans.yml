@@ -1,8 +1,9 @@
 # Floor plan workbook -> ZeroBias records, through the dynamic collector: the template is for every product of the
 # dataproducer interface.
-# It ships its files (params.requiredFiles, published from files/): a pipeline created from it gets its own copies, each
-# mapping's source linked to floorplan.xlsx, and the File mapping reads the drawing's version through $files while
-# floorplan.webp is attached (see README.md).
+# It ships its files as the samples of two file bindings (params.fileBindings, published from files/): a pipeline
+# created from it gets its own copies, each binding pointing at its copy. Every mapping reads the workbook through the
+# floorplanSpreadsheet binding, and the File mapping reads the drawing's version through $bindings while the
+# floorplanImage binding has a file (see README.md).
 # Left out, because only a boundary knows them: the context (boundary/target/scope), targets and the schedule. Set them
 # when you create the pipeline.
 # The mappings run in list order and that order matters: a link's property (planPosition, placement) is only written
@@ -31,20 +32,28 @@ format: json
 connectorType: dynamic
 scopeMode: selected
 params:
-  requiredFiles:
-    - name: floorplan.xlsx
+  fileBindings:
+    - variableName: floorplanSpreadsheet
       description: The floor plan workbook, one sheet per mapping.
-      mimeType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-      path: files/floorplan.xlsx
-    - name: floorplan.webp
+      mimeTypes:
+        - .xlsx
+        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      sample: files/floorplan.xlsx
+    - variableName: floorplanImage
       description: The floor plan drawing the File sheet describes.
-      mimeType: image/webp
-      path: files/floorplan.webp
+      mimeTypes:
+        - image/*
+        - .webp
+        - .png
+        - .jpg
+        - .jpeg
+        - .svg
+      sample: files/floorplan.webp
   dataMappings:
     - id: mapping_floorplan_file
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /File
         objectName: File
       mappings:
@@ -75,7 +84,7 @@ params:
           transform:
             type: expression
             options:
-              expression: '($f := $lookup($files, "floorplan.webp"); $f ? $f.name : (name ? name))'
+              expression: '($f := $bindings.floorplanImage; $f ? $f.name : (name ? name))'
           destination:
             key: name
             name: name
@@ -93,7 +102,7 @@ params:
           transform:
             type: expression
             options:
-              expression: '($f := $lookup($files, "floorplan.webp"); $f ? $f.fileVersionId : (fileVersionId ?
+              expression: '($f := $bindings.floorplanImage; $f ? $f.fileVersionId : (fileVersionId ?
                 $trim(fileVersionId)))'
           destination:
             key: fileVersionId
@@ -112,7 +121,7 @@ params:
           transform:
             type: expression
             options:
-              expression: '($f := $lookup($files, "floorplan.webp"); $f ? ($f.size != null ? $number($f.size)) : (size
+              expression: '($f := $bindings.floorplanImage; $f ? ($f.size != null ? $number($f.size)) : (size
                 != null ? $number(size)))'
           destination:
             key: size
@@ -149,7 +158,7 @@ params:
           transform:
             type: expression
             options:
-              expression: '($f := $lookup($files, "floorplan.webp"); $f ? ($f.mimeType ? $f.mimeType) : (mimeType ?
+              expression: '($f := $bindings.floorplanImage; $f ? ($f.mimeType ? $f.mimeType) : (mimeType ?
                 mimeType))'
           destination:
             key: mimeType
@@ -162,15 +171,15 @@ params:
       metadata:
         name: File sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / File: one row per drawing file. Blank cell = not set. fileVersionId and size are required
-          by the class. While floorplan.webp is attached, name, fileVersionId, size and mimeType come from it."
+        description: "floorplanSpreadsheet / File: one row per drawing file. Blank cell = not set. fileVersionId and size are required
+          by the class. While the floorplanImage binding has a file, name, fileVersionId, size and mimeType come from it."
       destination:
         classId: 79a6b04d-2aae-53c0-910f-482c562e3665
         className: File
     - id: mapping_floorplan_floorplan
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /FloorPlan
         objectName: FloorPlan
       mappings:
@@ -310,14 +319,14 @@ params:
       metadata:
         name: FloorPlan sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / FloorPlan: one row per drawing. Blank cell = not set."
+        description: "floorplanSpreadsheet / FloorPlan: one row per drawing. Blank cell = not set."
       destination:
         classId: 79270295-502b-576b-84bc-82faa8608d62
         className: FloorPlan
     - id: mapping_floorplan_physicalspace
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /PhysicalSpace
         objectName: PhysicalSpace
       mappings:
@@ -560,14 +569,14 @@ params:
       metadata:
         name: PhysicalSpace sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / PhysicalSpace: one row per space. Blank cell = not set."
+        description: "floorplanSpreadsheet / PhysicalSpace: one row per space. Blank cell = not set."
       destination:
         classId: c4faad22-0bd5-5159-ae70-6975d5685092
         className: PhysicalSpace
     - id: mapping_floorplan_physicalopening
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /PhysicalOpening
         objectName: PhysicalOpening
       mappings:
@@ -812,14 +821,14 @@ params:
       metadata:
         name: PhysicalOpening sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / PhysicalOpening: one row per door or window. Blank cell = not set."
+        description: "floorplanSpreadsheet / PhysicalOpening: one row per door or window. Blank cell = not set."
       destination:
         classId: 175a403c-a707-573c-af00-279299345d9d
         className: PhysicalOpening
     - id: mapping_floorplan_physicalasset
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /PhysicalAsset
         objectName: PhysicalAsset
       mappings:
@@ -1058,14 +1067,14 @@ params:
       metadata:
         name: PhysicalAsset sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / PhysicalAsset: one row per fixture, furniture or equipment item. Blank cell = not set."
+        description: "floorplanSpreadsheet / PhysicalAsset: one row per fixture, furniture or equipment item. Blank cell = not set."
       destination:
         classId: 3169d002-75b6-5f04-be8f-390433a3266c
         className: PhysicalAsset
     - id: mapping_floorplan_physicalobject
       source:
         file:
-          name: floorplan.xlsx
+          binding: floorplanSpreadsheet
           containerPath: /PhysicalObject
         objectName: PhysicalObject
       mappings:
@@ -1258,7 +1267,7 @@ params:
       metadata:
         name: PhysicalObject sheet
         createdAt: 2026-10-13T00:00:00.000Z
-        description: "floorplan.xlsx / PhysicalObject: one row per drawn item that is not an asset. Blank cell = not set."
+        description: "floorplanSpreadsheet / PhysicalObject: one row per drawn item that is not an asset. Blank cell = not set."
       destination:
         classId: 030a3931-a09c-5def-bb33-dc102ce66043
         className: PhysicalObject

@@ -23,12 +23,13 @@
     "package": "zerobias.zerobias.physicalspace.pipeline_template",
     "dataloader-version": "1.0.0",
     "import-artifact": "pipeline_template",
+    "documentation": "README.md",
     "catalog-files": [
       "files/floorplan.xlsx",
       "files/floorplan.webp"
     ]
   },
   "dependencies": {
-    "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.1.7"
+    "@zerobias-org/collectorbot-zerobias-zerobias-dynamic": "^1.1.8"
   }
 }
